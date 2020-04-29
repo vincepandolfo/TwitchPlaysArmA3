@@ -1,0 +1,23 @@
+﻿{
+	"on_join_message": "Salve a tutti! Questa sera i nostri giocatori difenderanno una base e starà a voi decidere da cosa verranno attaccati e quali rifornimenti riceveranno. 
+	Quando inizia un nuovo voto, semplicemente inviate un messaggio con il numero corrispondente. Ogni {0} minuti i voti verranno contanti e ciò che avete scelto succederà!",
+
+	"on_new_spawn_class_vote": "Inizia un nuovo voto! Prima scegliete che tipo di evento accadrà:",
+
+	"on_spawn_class_vote_complete": "La categoria scelta è: {0}",
+
+	"on_new_type_vote": "Ora scegliete cosa sarà:",
+
+	"on_type_vote_complete": "Il tipo scelto è: {0}",
+
+	"on_new_area_vote": "Ora scegliete dove comparirà:",
+
+	"on_all_votes_complete": "Un {0} di {1} arriverà a {2}",
+
+	"spawn_class": "Categoria",
+	"spawn_classes": "Categorie",
+	"area": "Zona",
+	"areas": "Zone",
+	"type": "Tipo",
+	"types": "Tipi"
+}
