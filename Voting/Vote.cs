@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Text;
 
-namespace TwitchPlaysArmA3
+namespace TwitchPlaysArmA3.Voting
 {
     public class Vote
     {
