@@ -36,10 +36,5 @@ namespace TwitchPlaysArmA3.Functions
 
             return toCall.Call(output, arguments);
         }
-
-        public static void SetCallback(ExtensionCallback callback)
-        {
-            _bot.SetCallback(callback);
-        }
     }
 }

@@ -16,19 +16,24 @@ namespace TwitchPlaysArmA3
     public class TwitchBot
     {
         private TwitchClient _twitchClient;
-        private int _actionInterval = (int)TimeSpan.FromMinutes(5).TotalMilliseconds;
-        private ExtensionCallback _callback;
         private IDictionary<string, string> _locale;
         private VotingManager _votingManager = new VotingManager();
         private string _channel;
-
-        private CancellationTokenSource _tokenSource;
         private Thread _runningBot;
+        private CancellationTokenSource _tokenSource;
 
         public void Start()
         {
             _tokenSource = new CancellationTokenSource();
-            _twitchClient.Connect();
+            _runningBot = new Thread(() =>
+            {
+                _twitchClient.Connect();
+
+                _tokenSource.Token.WaitHandle.WaitOne();
+
+                _twitchClient.Disconnect();
+            });
+            _runningBot.Start();
         }
 
         public void Stop()
@@ -37,20 +42,43 @@ namespace TwitchPlaysArmA3
             _runningBot.Join();
         }
 
-        public void AddSpawnClass(string name, IEnumerable<string> areas, IEnumerable<string> types)
+        public void AddVote(string name, IEnumerable<string> shortNames, IEnumerable<string> fullNames)
         {
-            _votingManager.AddSpawnClass(name, areas, types);
+            _votingManager.AddVote(name, shortNames, fullNames);
         }
 
-        public void SetCallback(ExtensionCallback callback)
+        public bool StartVote(string name)
         {
-            _votingManager.SetCallback(callback);
-            _callback = callback;
+            if (!_votingManager.IsValidVote(name))
+            {
+                return false;
+            }
+
+            var options = _votingManager.StartVote(name);
+
+            _twitchClient.SendMessage(_channel, string.Format(_locale["on_new_vote"], name));
+
+            foreach (var option in options.Split(new[] { Environment.NewLine },StringSplitOptions.None))
+            {
+                _twitchClient.SendMessage(_channel, option);
+            }
+
+            return true;
         }
 
-        public void SetActionInterval(int actionInterval)
+        public bool EndVote(out string result)
         {
-            _actionInterval = actionInterval;
+            if (!_votingManager.IsVoteHappening())
+            {
+                result = null;
+                return false;
+            }
+
+            result = _votingManager.EndVote();
+
+            _twitchClient.SendMessage(_channel, string.Format(_locale["on_vote_completed"], result));
+
+            return true;
         }
 
         public void ConfigureTwitch(string username, string accessToken, string channel)
@@ -73,24 +101,12 @@ namespace TwitchPlaysArmA3
         {
             var localeFilePath = Path.Combine(".", "Locales", $"{locale}.json");
             _locale = JsonConvert.DeserializeObject<IDictionary<string, string>>(File.ReadAllText(localeFilePath));
-            _votingManager.SetLocale(_locale);
         }
 
         private void OnJoinedChannel(object sender, OnJoinedChannelArgs e)
         {
             _channel = e.Channel;
-            _twitchClient.SendMessage(e.Channel, string.Format(_locale["on_join_message"], _actionInterval / 60f));
-            _runningBot = new Thread(async () =>
-            {
-                while (!_tokenSource.Token.IsCancellationRequested)
-                {
-                    _twitchClient.SendMessage(_channel, _votingManager.StartNextVote());
-                    await Task.Delay(_actionInterval * 1000);
-                    _twitchClient.SendMessage(_channel, _votingManager.GetResult());
-                }
-                _twitchClient.Disconnect();
-            });
-            _runningBot.Start();
+            _twitchClient.SendMessage(e.Channel, string.Format(_locale["on_join_message"]));
         }
 
         private void OnMessageReceived(object sender, OnMessageReceivedArgs e)
