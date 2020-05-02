@@ -12,21 +12,24 @@ namespace TwitchPlaysArmA3.Functions
 
         protected override int Execute(StringBuilder output, string[] args)
         {
-            var username = Sanitize(args[0]);
-            var accessToken = Sanitize(args[1]);
-            var channel = Sanitize(args[2]);
+            var appName = Sanitize(args[0]);
+            var clientId = Sanitize(args[1]);
+            var clientSecret = Sanitize(args[2]);
+            var accessToken = Sanitize(args[3]);
+            var refreshToken = Sanitize(args[4]);
+            var channel = Sanitize(args[5]);
 
-            bot.ConfigureTwitch(username, accessToken, channel);
-            output.Append($"Twitch access configured for user {username} in channel {channel}");
+            bot.ConfigureTwitch(appName, clientId, clientSecret, accessToken, refreshToken, channel);
+            output.Append($"Twitch access configured for user {appName} in channel {channel}");
 
             return 0;
         }
 
         protected override bool ValidateArguments(string[] args, out string error)
         {
-            if (args.Length != 3)
+            if (args.Length != 6)
             {
-                error = "3 parameters expected";
+                error = "6 parameters expected";
                 return false;
             }
 

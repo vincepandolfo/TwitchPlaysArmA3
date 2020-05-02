@@ -2,12 +2,15 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
+using System.Text;
 using System.Threading;
 using TwitchLib.Client;
 using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
 using TwitchLib.Communication.Clients;
 using TwitchLib.Communication.Models;
+using TwitchPlaysArmA3.Dto;
 using TwitchPlaysArmA3.Voting;
 
 namespace TwitchPlaysArmA3.Bot
@@ -20,6 +23,11 @@ namespace TwitchPlaysArmA3.Bot
         private string _channel;
         private Thread _runningBot;
         private CancellationTokenSource _tokenSource;
+        private string _username;
+        private string _clientId;
+        private string _clientSecret;
+        private string _refreshToken;
+        private HttpClient _httpClient = new HttpClient();
 
         public void Start()
         {
@@ -80,8 +88,14 @@ namespace TwitchPlaysArmA3.Bot
             return true;
         }
 
-        public void ConfigureTwitch(string username, string accessToken, string channel)
+        public void ConfigureTwitch(string username, string clientId, string clientSecret, string accessToken, string refreshToken, string channel)
         {
+            _username = username;
+            _clientId = clientId;
+            _clientSecret = clientSecret;
+            _refreshToken = refreshToken;
+            _channel = channel;
+
             var credentials = new ConnectionCredentials(username, accessToken);
             var clientOptions = new ClientOptions
             {
@@ -94,6 +108,30 @@ namespace TwitchPlaysArmA3.Bot
             _twitchClient.Initialize(credentials, channel);
             _twitchClient.OnJoinedChannel += OnJoinedChannel;
             _twitchClient.OnMessageReceived += OnMessageReceived;
+            _twitchClient.OnIncorrectLogin += OnIncorrectLogin;
+        }
+
+        private void OnIncorrectLogin(object sender, OnIncorrectLoginArgs e)
+        {
+            var requestBody = JsonConvert.SerializeObject(new RefreshRequestDto
+            {
+                refreshToken = _refreshToken,
+                clientId = _clientId,
+                clientSecret = _clientSecret
+            });
+
+            var request = new HttpRequestMessage(HttpMethod.Post, "https://id.twitch.tv/oauth2/token");
+
+            request.Content = new StringContent(requestBody, Encoding.UTF8, "application/json");
+            request.Content.Headers.ContentType.CharSet = "";
+            var response = _httpClient.SendAsync(request).Result;
+            var content = response.Content.ReadAsStringAsync().Result;
+
+            var result = JsonConvert.DeserializeObject<RefreshResponseDto>(content);
+            _refreshToken = result.refreshToken;
+
+            ConfigureTwitch(_username, _clientId, _clientSecret, result.accessToken, result.refreshToken, _channel);
+            Start();
         }
 
         public void SetLocale(string locale)
