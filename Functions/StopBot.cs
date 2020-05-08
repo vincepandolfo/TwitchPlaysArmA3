@@ -11,9 +11,14 @@ namespace TwitchPlaysArmA3.Functions
 
         protected override int Execute(StringBuilder output, string[] args)
         {
-            output.Append("Stopping the TwitchBot");
-            bot.Stop();
-            return 0;
+            if (bot.Stop())
+            {
+                output.Append("Stopped the Bot successfully");
+                return 0;
+            }
+
+            output.Append("Failed to stop the Bot");
+            return -1;
         }
 
         protected override bool ValidateArguments(string[] args, out string error)

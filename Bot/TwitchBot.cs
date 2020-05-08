@@ -43,10 +43,15 @@ namespace TwitchPlaysArmA3.Bot
             _runningBot.Start();
         }
 
-        public void Stop()
+        public bool Stop()
         {
-            _tokenSource.Cancel();
-            _runningBot.Join();
+            if (_tokenSource != null && _runningBot != null)
+            {
+                _tokenSource.Cancel();
+                _runningBot.Join();
+            }
+
+            return _tokenSource != null && _runningBot != null;
         }
 
         public void AddVote(string name, IEnumerable<string> shortNames, IEnumerable<string> fullNames)
