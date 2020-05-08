@@ -29,6 +29,7 @@ class CfgFunctions
 			class createVote{};
 			class startVote{};
 			class endVote{};
+			class stopBot{};
 		};
 	};
 };
@@ -241,6 +242,33 @@ class CfgVehicles
 		class ModuleDescription: ModuleDescription
 		{
 			description = "Starts a vote on Twitch";
+			sync[] = {};
+		};
+	}
+
+	class StopBotModule: Module_F
+	{
+		scope = 2;
+		displayName = "Stop Bot";
+		category = "Twitch";
+
+		isGlobal = 0;
+		isTriggerActivated = 1;
+		isDisposable = 1;
+		is3DEN = 0;
+
+		curatorInfoType = "RscDisplayAttributeStopBotModule";
+
+		function = "TwitchPlays_fnc_stopBot";
+
+		class Attributes: AttributesBase
+		{
+			class ModuleDescription: ModuleDescription {};
+		}
+
+		class ModuleDescription: ModuleDescription
+		{
+			description = "Disconnects the Bot from Twitch";
 			sync[] = {};
 		};
 	}
