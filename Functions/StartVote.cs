@@ -11,13 +11,15 @@ namespace TwitchPlaysArmA3.Functions
 
         protected override int Execute(StringBuilder output, string[] args)
         {
-            if (bot.StartVote(Sanitize(args[0]))) {
-                output.Append($"Started vote for {args[0]}");
+            var vote = Sanitize(args[0]);
+
+            if (bot.StartVote(vote)) {
+                output.Append($"Started vote for {vote}");
 
                 return 0;
             }
 
-            output.Append($"{args[0]} is not a known vote");
+            output.Append($"{vote} is not a known vote");
             return -1;
         }
 
