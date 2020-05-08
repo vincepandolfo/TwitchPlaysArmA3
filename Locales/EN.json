@@ -1,0 +1,9 @@
+﻿{
+	"on_join_message": "Hi all! TwitchPlaysArmA3 reporting in! During the game you'll be presented with some choices that will influence the mission.
+
+	In order to vote, simply type in chat the name of your chosen option. For example, for \"W - Weapons\" you can type \"W\" or \"Weapons\". Case doesn't matter.",
+
+	"on_new_vote": "A new vote is starting! Vote for {0}:",
+
+	"on_vote_completed": "Vote ended! You chose {0}"
+}
